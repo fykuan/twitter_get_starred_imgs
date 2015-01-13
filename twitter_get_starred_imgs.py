@@ -10,9 +10,16 @@ import urllib2
 import os
 
 def main(args):
+    dropbox_dir = None
+
     parser = argparse.ArgumentParser(description="Save images with starred")
     parser.add_argument("-c", "--config", type=argparse.FileType('r'))
+    parser.add_argument("-d", "--dropbox", action="store", type=str)
     arguments = parser.parse_args(args)
+
+    if hasattr(arguments, 'dropbox'):
+        dropbox_dir = arguments.dropbox
+
     twitter_creditentials = json.loads(arguments.config.read())
 
     twitter_api = twitter.Api(
@@ -36,10 +43,22 @@ def main(args):
         match = re.findall(r"http://.*?/media/(.*)", url)
         filename = match[0]
         if not os.path.isfile(filename):
-            outputfile = open("%s" % (filename), "wb")
-            print "Saving %s" % (filename)
-            outputfile.write(data.read())
-            outputfile.close()
+            if dropbox_dir != None:
+                try:
+                    outputfile = open("%s/twitter_get_starred_imgs/%s" % (dropbox_dir, filename), "wb")
+                    print "Saving %s to %s" % (filename, dropbox_dir)
+                    outputfile.write(data.read())
+                    outputfile.close()
+                except Exception as e:
+                    print e
+            else:
+                try:
+                    outputfile = open("%s" % (filename), "wb")
+                    print "Saving %s" % (filename)
+                    outputfile.write(data.read())
+                    outputfile.close()
+                except Exception as e:
+                    print e
         else:
             print "%s already exists" % (filename)
 
