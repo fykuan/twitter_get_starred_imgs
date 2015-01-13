@@ -32,13 +32,14 @@ def main(args):
     image_list = []
 
     for fav in favs:
+        twitid = fav.id
         try:
             for media in fav.media:
-                image_list.append(media['media_url'])
+                image_list.append([twitid, media['media_url']])
         except Exception as e:
             print e
 
-    for url in image_list:
+    for (twitid, url) in image_list:
         data = urllib2.urlopen(url)
         match = re.findall(r"http://.*?/media/(.*)", url)
         filename = match[0]
@@ -46,11 +47,16 @@ def main(args):
             try:
                 if not os.path.isfile("%s/twitter_get_starred_imgs/%s" % (dropbox_dir, filename)):
                     outputfile = open("%s/twitter_get_starred_imgs/%s" % (dropbox_dir, filename), "wb")
-                    print "Saving %s to %s" % (filename, dropbox_dir)
+                    print "[%s] Saving %s to %s" % (twitid, filename, dropbox_dir)
                     outputfile.write(data.read())
                     outputfile.close()
                 else:
                     print "%s/twitter_get_starred_imgs/%s already exists" % (dropbox_dir, filename)
+            except Exception as e:
+                print e
+
+            try:
+                twitter_api.DestroyFavorite(id=twitid)
             except Exception as e:
                 print e
         else:
@@ -60,8 +66,14 @@ def main(args):
                     print "Saving %s" % (filename)
                     outputfile.write(data.read())
                     outputfile.close()
+                    twitter_api.DestroyFavorite(twitid)
                 else:
-                    print "%s already exists" % (filename)
+                    print "[%s] %s already exists" % (twitid, filename)
+            except Exception as e:
+                print e
+
+            try:
+                twitter_api.DestroyFavorite(id=twitid)
             except Exception as e:
                 print e
 
