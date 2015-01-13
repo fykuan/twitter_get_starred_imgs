@@ -42,25 +42,28 @@ def main(args):
         data = urllib2.urlopen(url)
         match = re.findall(r"http://.*?/media/(.*)", url)
         filename = match[0]
-        if not os.path.isfile(filename):
-            if dropbox_dir != None:
-                try:
+        if dropbox_dir != None:
+            try:
+                if not os.path.isfile("%s/twitter_get_starred_imgs/%s" % (dropbox_dir, filename)):
                     outputfile = open("%s/twitter_get_starred_imgs/%s" % (dropbox_dir, filename), "wb")
                     print "Saving %s to %s" % (filename, dropbox_dir)
                     outputfile.write(data.read())
                     outputfile.close()
-                except Exception as e:
-                    print e
-            else:
-                try:
+                else:
+                    print "%s/twitter_get_starred_imgs/%s already exists" % (dropbox_dir, filename)
+            except Exception as e:
+                print e
+        else:
+            try:
+                if not os.path.isfile("%s" % (filename)):
                     outputfile = open("%s" % (filename), "wb")
                     print "Saving %s" % (filename)
                     outputfile.write(data.read())
                     outputfile.close()
-                except Exception as e:
-                    print e
-        else:
-            print "%s already exists" % (filename)
+                else:
+                    print "%s already exists" % (filename)
+            except Exception as e:
+                print e
 
 if __name__ == "__main__":
     main(sys.argv[1:])
